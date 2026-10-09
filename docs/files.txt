@@ -2352,3 +2352,184 @@ Next I need to connect `WinFileFinder::getSearchRoots()` with `FileFinder::findf
 
 I also need to handle directories where the program does not have permission to access them so that the search does not terminate unexpectedly.
 
+Day 8
+Date 9th October 2026
+
+# FileFinder Project Journal — 9 October 2026
+
+## Today's Objective
+
+Continue developing the C++ FileFinder project by debugging recursive filesystem traversal, understanding error handling with `std::error_code`, and investigating why searching across all Windows drives caused a runtime error.
+
+## 1. Reviewed the Existing FileFinder Implementation
+
+Revisited the `FileFinder::findfiles()` function, which:
+
+* Obtains search roots using `getSearchRoots()`.
+* Uses `std::filesystem::recursive_directory_iterator` to traverse directories and subdirectories.
+* Checks whether each entry is a regular file.
+* Compares the filename with the requested filename.
+* Stores matching file paths in a `std::vector<fs::path>`.
+
+This reinforced the separation of responsibilities between the base class `FileFinder`, which implements the common search algorithm, and the derived `WinFileFinder`, which discovers Windows drive roots.
+
+## 2. Learned About Filesystem Iterators
+
+Studied how to create and use a recursive directory iterator:
+
+```cpp
+fs::recursive_directory_iterator it(
+    root,
+    fs::directory_options::skip_permission_denied,
+    ec
+);
+```
+
+Learned that:
+
+* `recursive_directory_iterator` is a class from the C++ filesystem library.
+* `it` is an iterator object representing the current position in a directory traversal.
+* The iterator visits directory entries recursively rather than storing the entire directory tree.
+* A default-constructed iterator can represent the end state of traversal.
+* `it.increment(ec)` advances the iterator while reporting errors through an error-code object.
+
+Also learned that `skip_permission_denied` handles certain permission-denied situations but does not prevent every possible filesystem error.
+
+## 3. Learned About `std::error_code`
+
+Studied how filesystem operations can report errors without throwing exceptions.
+
+Created an error-code object:
+
+```cpp
+std::error_code ec;
+```
+
+Learned that an error code can be checked with:
+
+```cpp
+if (ec)
+{
+    // An error occurred.
+}
+```
+
+Also learned the distinction between namespace aliases and type aliases:
+
+```cpp
+namespace fs = std::filesystem;
+using ec_type = std::error_code;
+```
+
+A namespace alias uses `namespace`, while a type alias uses `using`. An object of type `std::error_code` is declared as `std::error_code ec;`.
+
+## 4. Distinguished `ec` from `type_ec`
+
+Learned that different filesystem operations can fail independently, so separate error-code objects can be useful.
+
+* `ec` handles errors associated with iterator construction and advancement.
+* `type_ec` handles errors encountered while checking an entry's file type.
+
+For example:
+
+```cpp
+std::error_code type_ec;
+
+if (it->is_regular_file(type_ec) &&
+    !type_ec &&
+    it->path().filename() == filename)
+{
+    found_files.push_back(it->path());
+}
+```
+
+Understood the roles of `is_regular_file()`, `path()`, `filename()`, logical `&&`, logical negation `!`, and `push_back()`.
+
+## 5. Investigated the Iterator Advancement Error
+
+While searching for `arrays.py`, the program produced:
+
+```text
+Iterator advancement failed.
+Error value: 22
+Error message: [Invalid argument]
+```
+
+The error occurred during `it.increment(ec)`, rather than necessarily during iterator construction.
+
+Added diagnostic output to identify the previous entry processed before the failure. The program reported:
+
+```text
+Previous entry: C:\$Recycle.Bin\S-1-5-18
+Error value: 22
+Error message: [Invalid argument]
+```
+
+This established that the traversal failed while advancing after processing an entry associated with the Windows Recycle Bin. The precise underlying cause remains unconfirmed.
+
+## 6. Investigated Skipping the Recycle Bin
+
+Learned about:
+
+```cpp
+it.disable_recursion_pending();
+```
+
+This instructs a recursive directory iterator not to descend into the current directory when it advances.
+
+The intended exclusion check was:
+
+```cpp
+if (it->is_directory(type_ec) &&
+    !type_ec &&
+    it->path().filename() == "$Recycle.Bin")
+{
+    it.disable_recursion_pending();
+}
+```
+
+Understood that checking `is_directory()` does not automatically prevent directory traversal. The iterator normally enters folders to search their contents; `disable_recursion_pending()` prevents descent into the specifically selected directory.
+
+The exclusion was investigated, but the traversal issue has not yet been conclusively resolved.
+
+## 7. Used Debugging Output to Trace Execution
+
+Added diagnostic output such as:
+
+```cpp
+std::cout << "Checking: "
+          << it->path().string() << '\n';
+```
+
+This showed that the iterator successfully processed and printed multiple directory paths before the increment error appeared.
+
+Learned that successful processing of earlier entries does not guarantee that the entire traversal will finish successfully.
+
+Also learned to save the current path before incrementing the iterator, because the iterator's state should not be assumed valid after an increment error.
+
+## Concepts Learned Today
+
+* Object creation and constructors in C++.
+* Filesystem paths and recursive directory iteration.
+* Namespace aliases versus type aliases.
+* Error handling using `std::error_code`.
+* Difference between iterator errors and file-type checking errors.
+* Short-circuit evaluation using `&&`.
+* Recursive traversal and `disable_recursion_pending()`.
+* Debugging runtime errors through diagnostic output.
+* Why filesystem traversal requires explicit error handling.
+
+## Remaining Tasks
+
+1. Inspect the current implementation of the traversal loop.
+2. Verify that the `$Recycle.Bin` exclusion check executes before iterator advancement.
+3. Determine why the iterator reports `Invalid argument` during advancement.
+4. Improve error recovery so a failure in one directory does not unnecessarily prevent searching the remainder of that drive.
+5. Test the search on a specific user-controlled directory before testing all available drives.
+6. Confirm that matching files are collected and returned correctly.
+
+## Today's Conclusion
+
+Today's work focused on understanding the mechanics of recursive filesystem traversal and diagnosing a runtime error rather than adding new search features. The main progress was learning how the iterator, filesystem paths, error-code objects, and recursion controls interact.
+
+The original traversal error remains under investigation. The next session will focus on identifying its underlying cause and making FileFinder's search robust against filesystem errors.
