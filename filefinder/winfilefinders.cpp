@@ -2,7 +2,9 @@
 #include<vector>
 #include<filesystem>
 #include<iostream>
+#include <unordered_set>
 #include "filefinder.h"
+#include "winfilefinder.h"
 
 
 std::vector<fs::path> WinFileFinder::getSearchRoots(){
