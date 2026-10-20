@@ -13,8 +13,6 @@ protected:
     std::string filename;
 
 public:
-    FileFinder(const std::string &filename) : filename(filename) {}
-
     std::unordered_set<fs::path> findfiles();
     virtual std::vector<fs::path> getSearchRoots() = 0; // Pure virtual: each OS-specific class must provide its own implementation
 };

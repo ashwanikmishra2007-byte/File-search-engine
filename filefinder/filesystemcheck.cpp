@@ -67,29 +67,29 @@ namespace fs = std::filesystem;
     }
 }*/
 
-int main()
+/*int main()
 {
     const char *path = R"(C:\Documents and Settings)";
 
     DWORD attributes = GetFileAttributesA(path); // Get file attributes by passing the address of path
     // The A suffix means this version accepts a narrow-character string.
-    /*Windows may report several attributes together as individual bits in an integer.
-    For example, the result can indicate that the path represents a directory and is a reparse point.*/
+    Windows may report several attributes together as individual bits in an integer.
+    For example, the result can indicate that the path represents a directory and is a reparse point.
 
-    if (attributes == INVALID_FILE_ATTRIBUTES) /*The Windows API uses the special constant INVALID_FILE_ATTRIBUTES to indicate failure.
-   checks whether Windows failed to retrieve the attributes.*/
+    if (attributes == INVALID_FILE_ATTRIBUTES) The Windows API uses the special constant INVALID_FILE_ATTRIBUTES to indicate failure.
+   checks whether Windows failed to retrieve the attributes.
     {
         std::cout << "Failed: " << GetLastError() << '\n'; //If it failed retrieves the Windows error code associated with the failure.
         return 1;
     }
 
     if (attributes & FILE_ATTRIBUTE_REPARSE_POINT)
-    { /*First, Windows defines the constant:
+    { First, Windows defines the constant:
         FILE_ATTRIBUTE_REPARSE_POINT
         It represents a particular bit flag in the attributes value.
         The expression:
         attributes & FILE_ATTRIBUTE_REPARSE_POINT
-        uses the bitwise AND operator (&) to check whether that flag is present.*/
+        uses the bitwise AND operator (&) to check whether that flag is present.
         std::cout << "This path is a reparse point.\n";
     }
     else
