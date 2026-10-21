@@ -56,6 +56,7 @@ public:
     void findfiles();
 
     bool getfilesysteminfo(const fs::path &path, Filesysteminfo &identity);
+    std::vector<fs::path> getfiles();
 
     void display(const std::vector<fs::path> &found_files)
     {

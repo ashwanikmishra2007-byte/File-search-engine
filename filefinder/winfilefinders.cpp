@@ -61,6 +61,56 @@ bool WinFileFinder::getfilesysteminfo(const fs::path &path, Filesysteminfo &iden
     return true;
 }
 
+std::vector<fs::path> WinFileFinder::getfiles()
+{
+    std::vector<fs::path> files;
+    std::vector<fs::path> root = getSearchRoots();
+    std::error_code typeError;
+    std::error_code ec;
+    std::error_code incrementerror;
+
+    while (!root.empty())
+    {
+        fs::path current = root.back();
+        root.pop_back();
+        fs::directory_iterator it(current, ec);
+        fs::directory_iterator end;
+
+        if (ec)
+        { // If there is an error if the directory cannot be opened skip it
+            ec.clear();
+            continue;
+        }
+
+        while (it != end)
+        {
+            const fs::directory_entry &entry = *it;
+            fs::path entrypath = entry.path();
+
+            fs::file_status status = entry.symlink_status(typeError); // To check if it is a symbolic link
+            if (!typeError && fs::is_directory(status))
+            { // Type error iterators type cannot be inspected
+                root.push_back(entrypath);
+            }
+            else if (!typeError && fs::is_regular_file(status))
+            {
+                files.push_back(entrypath);
+            }
+            typeError.clear();
+
+            it.increment(incrementerror);
+
+            if (incrementerror)
+            {
+                incrementerror.clear();
+                break;
+            }
+        }
+    }
+
+    return files;
+}
+
 void WinFileFinder::findfiles()
 {
 
@@ -102,5 +152,11 @@ void WinFileFinder::findfiles()
 int main()
 {
     WinFileFinder finder;
-    finder.findfiles();
+    std::vector<fs::path> files = finder.getfiles();
+    std::cout << "Files found: " << files.size() << '\n';
+
+    for (const auto &file : files)
+    {
+        std::cout << file.string() << '\n';
+    }
 }
