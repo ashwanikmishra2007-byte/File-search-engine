@@ -61,13 +61,24 @@ bool WinFileFinder::getfilesysteminfo(const fs::path &path, Filesysteminfo &iden
     return true;
 }
 
-std::vector<fs::path> WinFileFinder::getfiles()
+std::unordered_set<fs::path> WinFileFinder::getfiles()
 {
-    std::vector<fs::path> files;
+    std::unordered_set<fs::path> files;
+    std::unordered_set<Filesysteminfo, decltype(hashfunction)> visiteddir{0, hashfunction};
     std::vector<fs::path> root = getSearchRoots();
     std::error_code typeError;
     std::error_code ec;
     std::error_code incrementerror;
+
+    for (const auto &path : root)
+    {
+        Filesysteminfo identity;
+
+        if (getfilesysteminfo(path, identity))
+        {
+            visiteddir.insert(identity);
+        }
+    }
 
     while (!root.empty())
     {
@@ -90,11 +101,24 @@ std::vector<fs::path> WinFileFinder::getfiles()
             fs::file_status status = entry.symlink_status(typeError); // To check if it is a symbolic link
             if (!typeError && fs::is_directory(status))
             { // Type error iterators type cannot be inspected
-                root.push_back(entrypath);
+                Filesysteminfo identity;
+                if (getfilesysteminfo(entrypath, identity))
+                {
+                    auto [it, inserted] = visiteddir.insert(identity);
+                    /*emplace() returns a pair containing an iterator and a Boolean.
+            Variable	Meaning
+            it	Iterator to the existing or newly inserted entry
+            inserted	true if insertion succeeded; otherwise false
+            We need inserted when we want to decide whether to traverse the directory.*/
+                    if (inserted)
+                    {
+                        root.push_back(entrypath);
+                    }
+                }
             }
             else if (!typeError && fs::is_regular_file(status))
             {
-                files.push_back(entrypath);
+                files.insert(entrypath);
             }
             typeError.clear();
 
@@ -109,6 +133,20 @@ std::vector<fs::path> WinFileFinder::getfiles()
     }
 
     return files;
+}
+
+void WinFileFinder::buildhashmap()
+{
+    std::unordered_set<fs::path> allfiles = getfiles();
+
+    for (const auto &file : allfiles)
+    {
+        Filesysteminfo identity;
+        if (getfilesysteminfo(file, identity))
+        {
+            filemap.emplace(identity, file);
+        }
+    }
 }
 
 void WinFileFinder::findfiles()
@@ -152,11 +190,11 @@ void WinFileFinder::findfiles()
 int main()
 {
     WinFileFinder finder;
-    std::vector<fs::path> files = finder.getfiles();
-    std::cout << "Files found: " << files.size() << '\n';
+    // std::ve<fs::path> files = finder.getfiles();
+    // std::cout << "Files found: " << files.size() << '\n';
 
-    for (const auto &file : files)
+    // for (const auto &file : files)
     {
-        std::cout << file.string() << '\n';
+        //    std::cout << file.string() << '\n';
     }
 }

@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cstddef>
 #include "filefinder.h"
+#include <unordered_set>
 
 namespace fs = std::filesystem;
 
@@ -56,7 +57,8 @@ public:
     void findfiles();
 
     bool getfilesysteminfo(const fs::path &path, Filesysteminfo &identity);
-    std::vector<fs::path> getfiles();
+    std::unordered_set<fs::path> getfiles();
+    void buildhashmap();
 
     void display(const std::vector<fs::path> &found_files)
     {
