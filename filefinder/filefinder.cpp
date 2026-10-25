@@ -68,10 +68,10 @@ std::unordered_set<fs::path> FileFinder::findfiles()
                 dir_iter.disable_recursion_pending();
             }
 
-            if (dir_iter->is_regular_file(type_ac) && !type_ac && dir_iter->path().filename() == filename)
+            /*if (dir_iter->is_regular_file(type_ac) && !type_ac && dir_iter->path().filename().string() == filename)
             {
                 found_files.insert(dir_iter->path());
-            }
+            }*/
 
             std::string current_path = dir_iter->path().string();
 

@@ -11,7 +11,7 @@ class FileFinder
 {
 protected:
     std::string filename;
-
+    std::unordered_map<std::string, std::vector<fs::path>> filename;
 public:
     std::unordered_set<fs::path> findfiles();
     virtual std::vector<fs::path> getSearchRoots() = 0; // Pure virtual: each OS-specific class must provide its own implementation
