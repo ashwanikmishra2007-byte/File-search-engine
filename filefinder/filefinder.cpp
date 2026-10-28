@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 #include <filesystem>
 #include <string>
 #include <unordered_set>
@@ -7,7 +7,7 @@
 #include "filefinder.h"
 #include "winfilefinder.h"
 
-namespace fs = std::filesystem;
+namespace fs = std::filesystem;*/
 
 /*namespace std
 {
@@ -38,7 +38,7 @@ FileFinder::FileFinder(const std::string &filename)
 WinFileFinder::WinFileFinder(const std::string &filename)
     : FileFinder(filename)
 {
-}*/
+}
 
 std::unordered_set<fs::path> FileFinder::findfiles()
 {
@@ -68,10 +68,10 @@ std::unordered_set<fs::path> FileFinder::findfiles()
                 dir_iter.disable_recursion_pending();
             }
 
-            /*if (dir_iter->is_regular_file(type_ac) && !type_ac && dir_iter->path().filename().string() == filename)
+            if (dir_iter->is_regular_file(type_ac) && !type_ac && dir_iter->path().filename().string() == filename)
             {
                 found_files.insert(dir_iter->path());
-            }*/
+            }
 
             std::string current_path = dir_iter->path().string();
 
@@ -93,7 +93,7 @@ std::unordered_set<fs::path> FileFinder::findfiles()
     }
 
     return found_files;
-}
+}*/
 
 /*int main()
 {

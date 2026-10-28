@@ -1,8 +1,8 @@
-#define _WIN32_WINNT 0x0602
+/*#define _WIN32_WINNT 0x0602
 #include <iostream>
 #include <string>
 #include <cstdio>
-#include <windows.h>
+#include <windows.h>*/
 
 /*int main()
 {

@@ -24,21 +24,23 @@ struct Filesysteminfo
    - A positive integer if the first differing byte in the first memory region is larger.*/
                    fileId.Identifier,
                    other.fileId.Identifier,
-                   sizeof(fileId.Identifier)) == 0;  //Compare only the array of 16 bytes not the entire structure because Windows defines FILE_ID_128 essentially as a structure containing a 16-byte array:
+                   sizeof(fileId.Identifier)) == 0; // Compare only the array of 16 bytes not the entire structure because Windows defines FILE_ID_128 essentially as a structure containing a 16-byte array:
     }
 };
 
-//std::size_t is an unsigned integer type provided by C++ that is capable of representing the size of any object in bytes.
-auto hashfunction = [] (const Filesysteminfo &info)-> std::size_t{
-    std::size_t hashvalue= std::hash<DWORD>{}(info.volumenumber);  //CPP library tempelate takes a value and converts it into a number called a hash value.
-    for(unsigned char byte: info.fileId.Identifier){
-        //std::hash<unsigned char>{}(byte) takes the value stored in byte and calculates a hash value from it.
-        hashvalue= hashvalue^ (std::hash<unsigned char> {}(byte)+
-        //This is a hexadecimal integer constant used by a common hash-combining formula.
+// std::size_t is an unsigned integer type provided by C++ that is capable of representing the size of any object in bytes.
+auto hashfunction = [](const Filesysteminfo &info) -> std::size_t
+{
+    std::size_t hashvalue = std::hash<DWORD>{}(info.volumenumber); // CPP library tempelate takes a value and converts it into a number called a hash value.
+    for (unsigned char byte : info.fileId.Identifier)
+    {
+        // std::hash<unsigned char>{}(byte) takes the value stored in byte and calculates a hash value from it.
+        hashvalue = hashvalue ^ (std::hash<unsigned char>{}(byte) +
+                                 // This is a hexadecimal integer constant used by a common hash-combining formula.
 
-//It isn't part of your directory identity. It helps mix the different components together.
-/*Those shift amounts come from a commonly used hash-combining formula. They are heuristic choices intended to mix bits, not mathematical guarantees of a collision-free hash.*/
-        0x9e3779b9+(hashvalue<<6)+(hashvalue>>2));
+                                 // It isn't part of your directory identity. It helps mix the different components together.
+                                 /*Those shift amounts come from a commonly used hash-combining formula. They are heuristic choices intended to mix bits, not mathematical guarantees of a collision-free hash.*/
+                                 0x9e3779b9 + (hashvalue << 6) + (hashvalue >> 2));
     }
     return hashvalue;
 };
@@ -55,10 +57,13 @@ public:
     std::vector<fs::path> getSearchRoots() override;
 
     void findfiles();
+    WinFileFinder();
 
     bool getfilesysteminfo(const fs::path &path, Filesysteminfo &identity);
     std::unordered_set<fs::path> getfiles();
     void buildhashmap();
+    void buildfilename();
+    void searchfile();
 
     void display(const std::vector<fs::path> &found_files)
     {

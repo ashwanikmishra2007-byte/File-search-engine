@@ -7,6 +7,12 @@
 #include <iostream>
 #include <unordered_set>
 #include "winfilefinder.h"
+#include <string>
+
+WinFileFinder::WinFileFinder()
+{
+    buildfilename();
+}
 
 std::vector<fs::path> WinFileFinder::getSearchRoots()
 {
@@ -149,6 +155,71 @@ void WinFileFinder::buildhashmap()
     }
 }
 
+void WinFileFinder::buildfilename()
+{
+    filenameidx.clear();
+    std::unordered_set<fs::path> files = getfiles();
+    std::cout << "Files discovered: " << files.size() << '\n';
+
+    for (const auto &file : files)
+    {
+        std::string name = file.filename().string();
+        filenameidx[name].push_back(file);
+    }
+    std::cout << "Unique filenames indexed: "
+              << filenameidx.size() << '\n';
+}
+
+void WinFileFinder::searchfile()
+{
+    std::string name;
+    std::cin.ignore();
+    std::cout << "Enter the filename to be searched";
+    std::getline(std::cin, name);
+    std::cout << std::endl;
+
+    /*auto it = filenameidx.find(name);
+    if (it == filenameidx.end())
+    {
+        std::cout << "No such files found";
+        std::cout << std::endl;
+        return;
+    }
+
+    for (const auto &file : it->second)
+    {
+        std::cout << file;
+        std::cout << std::endl;
+    }*/
+
+    for(const auto &[name,paths]:filenameidx){
+        std::cout<<name ;
+        for (const auto &path : paths)
+        {
+            std::cout << path << std::endl;
+        }
+
+    }
+
+    /*for (const auto &[name, paths] : filenameidx)
+    {
+        if (name.find("winfilefinders") != std::string::npos ||
+            name.find("WinFileFinders") != std::string::npos)
+        {
+            std::cout << "Found index key: " << name << '\n';
+
+            for (const auto &path : paths)
+            {
+                std::cout << path << '\n';
+            }
+        } 
+        else {
+            std::cout<<"File not found";
+            std::cout<<std::endl;
+        }
+    }*/
+}
+
 void WinFileFinder::findfiles()
 {
 
@@ -190,11 +261,24 @@ void WinFileFinder::findfiles()
 int main()
 {
     WinFileFinder finder;
-    // std::ve<fs::path> files = finder.getfiles();
-    // std::cout << "Files found: " << files.size() << '\n';
-
-    // for (const auto &file : files)
+    int choice;
+    do
     {
-        //    std::cout << file.string() << '\n';
-    }
+        std::cout << "Enter your choice 1 for search file 2 buildmap";
+        std::cin >> choice;
+        std::cout << std::endl;
+        switch (choice)
+        {
+        case 1:
+            finder.searchfile();
+            break;
+        case 2:
+            finder.buildfilename();
+            break;
+        default:
+            std::cout << "Abe sahi number daal na ";
+            std::cout << std::endl;
+            break;
+        }
+    } while (choice != 3);
 }
