@@ -14,7 +14,7 @@
 
 // Compatible layout of the MFT enumeration request.
 // Avoids depending on MFT_ENUM_DATA_V0 being declared.
-struct MftEnumDataCompat
+/*struct MftEnumDataCompat
 {
     DWORDLONG StartFileReferenceNumber;
     LONGLONG LowUsn;
@@ -357,4 +357,4 @@ int main()
     CloseHandle(volume);
 
     return 0;
-}
+}*/

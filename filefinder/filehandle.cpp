@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <iostream>
 
-int main() {
+/*int main() {
     HANDLE volume = CreateFileW(
         L"\\\\.\\C:",
         GENERIC_READ,
@@ -23,4 +23,4 @@ int main() {
 
     CloseHandle(volume);
     return 0;
-}
+}*/
