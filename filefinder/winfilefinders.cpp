@@ -1,7 +1,4 @@
-#include <vector>
-#include <filesystem>
 #include <iostream>
-#include <unordered_set>
 #include "winfilefinder.h"
 #include "ntfsfilerecord.h"
 #include <system_error>
@@ -121,6 +118,7 @@ version 3 uses 128-bit file reference identifiers, whereas our current Filerecor
 
     result.filereference = record->FileReferenceNumber;
     result.parentreference = record->ParentFileReferenceNumber;
+    result.attributes = record->FileAttributes;
 
     if (record->FileNameOffset > record->RecordLength ||
         record->FileNameLength > record->RecordLength - record->FileNameOffset)
@@ -165,6 +163,20 @@ std::vector<Filerecord> WinFilefinder::search(const std::wstring &filename)
         return it->second; // Return the vector of Filerecords for the given filename
     }
     return {}; // Return an empty vector if the filename is not found
+}
+
+void WinFilefinder::recordIndexInsert(){
+    recordindex.clear(); // Clear the existing record index before populating it
+    Recordlocation recordlocation;
+    for(const auto &entry : fileindex){
+        const std::wstring &filename = entry.first;
+        const std::vector<Filerecord> &records = entry.second;
+        for(size_t i=0; i<records.size(); i++){
+            recordlocation.filename = filename;
+            recordlocation.index = i;
+            recordindex[records[i].filereference] = recordlocation;
+        }
+    }
 }
 
 int main()

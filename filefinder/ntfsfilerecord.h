@@ -17,3 +17,8 @@ enum class Extractstatus{
     Invalidfilenamebounds,
     Invalidfilenamelength
 };
+
+struct Recordlocation{
+    std::wstring filename;
+    size_t index;
+};

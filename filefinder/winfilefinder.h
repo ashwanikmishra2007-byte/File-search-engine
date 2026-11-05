@@ -13,6 +13,7 @@ protected:
     std::wstring volumename;
     HANDLE volumehandle=INVALID_HANDLE_VALUE;
     std::unordered_map<std::wstring, std::vector<Filerecord>> fileindex;
+    std::unordered_map<uint64_t, Recordlocation> recordindex; // Maps file reference numbers to their corresponding Recordlocation
 
 public:
     WinFilefinder(const std::wstring &volumename);
@@ -22,4 +23,7 @@ public:
     void insert(Filerecord &record);
     const auto &getFileIndex();
     std::vector<Filerecord> search(const std::wstring &filename);
+    void recordIndexInsert();
+    std::wstring pathreconstruct(uint64_t filereference);
+    uint64_t getparentreference();
 };
