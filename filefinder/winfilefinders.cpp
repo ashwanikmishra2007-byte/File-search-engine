@@ -155,16 +155,6 @@ const auto &WinFilefinder::getFileIndex()
     return fileindex;
 }
 
-std::vector<Filerecord> WinFilefinder::search(const std::wstring &filename)
-{
-    auto it = fileindex.find(filename);
-    if (it != fileindex.end())
-    {
-        return it->second; // Return the vector of Filerecords for the given filename
-    }
-    return {}; // Return an empty vector if the filename is not found
-}
-
 void WinFilefinder::recordIndexInsert(){
     recordindex.clear(); // Clear the existing record index before populating it
     Recordlocation recordlocation;
@@ -179,7 +169,7 @@ void WinFilefinder::recordIndexInsert(){
     }
 }
 
-int main()
+/*int main()
 {
     try
     {
@@ -259,4 +249,4 @@ int main()
     }
 
     return 0;
-}
+}*/

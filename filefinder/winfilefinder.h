@@ -22,7 +22,7 @@ public:
     void enumerate();
     void insert(Filerecord &record);
     const auto &getFileIndex();
-    std::vector<Filerecord> search(const std::wstring &filename);
+    std::vector<std::wstring> search(const std::wstring &filename);
     void recordIndexInsert();
     std::wstring pathreconstruct(uint64_t filereference);
     uint64_t getparentreference();
